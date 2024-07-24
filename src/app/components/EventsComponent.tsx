@@ -1,78 +1,97 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useBuckets } from '@/context/bucketContext';
-import { useEvents } from '@/context/eventContext';
+import { useBuckets } from '../../context/bucketContext';
+import { useEvents } from '../../context/eventContext';
+import { format, parseISO } from 'date-fns';
+import EventsPieChart from './Chart';
 
 const EventsComponent: React.FC = () => {
-  const { buckets } = useBuckets();
+  const { buckets, fetchBuckets } = useBuckets();
   const { events, fetchEvents } = useEvents();
-  const [selectedBucketId, setSelectedBucketId] = useState<string | undefined>(undefined);
-  const [timeRange, setTimeRange] = useState<string>('1h');
+  const [selectedBucket, setSelectedBucket] = useState<string>('');
+  const [timeRange, setTimeRange] = useState<string>('15min');
 
   useEffect(() => {
-    if (selectedBucketId) {
+    fetchBuckets();
+  }, [fetchBuckets]);
+
+  const handleBucketChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedBucket(event.target.value);
+  };
+
+  const handleTimeRangeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setTimeRange(event.target.value);
+  };
+
+  const handleUpdateEvents = () => {
+    if (selectedBucket) {
+      let startDate: Date | undefined;
       const now = new Date();
-      let startDate: Date;
 
       switch (timeRange) {
-        case '15m':
+        case '15min':
           startDate = new Date(now.getTime() - 15 * 60 * 1000);
           break;
-        case '30m':
+        case '30min':
           startDate = new Date(now.getTime() - 30 * 60 * 1000);
           break;
         case '1h':
           startDate = new Date(now.getTime() - 60 * 60 * 1000);
           break;
         case '2h':
-          startDate = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+          startDate = new Date(now.getTime() - 2 * 60 * 1000);
           break;
         case '4h':
-          startDate = new Date(now.getTime() - 4 * 60 * 60 * 1000);
+          startDate = new Date(now.getTime() - 4 * 60 * 1000);
           break;
         case '6h':
-          startDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+          startDate = new Date(now.getTime() - 6 * 60 * 1000);
           break;
         case '12h':
-          startDate = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+          startDate = new Date(now.getTime() - 12 * 60 * 1000);
           break;
         case '24h':
-          startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+          startDate = new Date(now.getTime() - 24 * 60 * 1000);
           break;
         default:
-          startDate = new Date(now.getTime() - 60 * 60 * 1000); // Default to 1 hour
+          startDate = undefined;
       }
 
-      fetchEvents(selectedBucketId, startDate, now);
+      fetchEvents(selectedBucket, startDate, now);
     }
-  }, [selectedBucketId, timeRange, fetchEvents]);
+  };
 
   return (
-    <div>
-      <h2>Eventos</h2>
-      <div>
-        <label>
-          Bucket:
+    <div className="p-4 max-w-4xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Eventos</h2>
+      <div className="mb-4">
+        <label className="block mb-2 text-sm font-medium text-gray-700">
+          Selecione o Bucket:
           <select
-            value={selectedBucketId}
-            onChange={(e) => setSelectedBucketId(e.target.value)}
+            value={selectedBucket}
+            onChange={handleBucketChange}
+            className="block w-full mt-1 p-2 border border-gray-300 rounded-md"
           >
-            <option value="">Selecione um bucket</option>
-            {buckets.map((bucket) => (
+            <option value="">Selecione...</option>
+            {buckets.map(bucket => (
               <option key={bucket.id} value={bucket.id}>
-                {bucket.name || bucket.id}
+                {bucket.name ?? bucket.id}
               </option>
             ))}
           </select>
         </label>
       </div>
-      <div>
-        <label>
-          Intervalo de tempo:
-          <select value={timeRange} onChange={(e) => setTimeRange(e.target.value)}>
-            <option value="15m">Últimos 15 minutos</option>
-            <option value="30m">Últimos 30 minutos</option>
+      <div className="mb-4">
+        <label className="block mb-2 text-sm font-medium text-gray-700">
+          Selecione o Intervalo de Tempo:
+          <select
+            value={timeRange}
+            onChange={handleTimeRangeChange}
+            className="block w-full mt-1 p-2 border border-gray-300 rounded-md"
+          >
+            <option value="15min">Últimos 15 minutos</option>
+            <option value="30min">Últimos 30 minutos</option>
             <option value="1h">Última 1 hora</option>
             <option value="2h">Últimas 2 horas</option>
             <option value="4h">Últimas 4 horas</option>
@@ -82,15 +101,15 @@ const EventsComponent: React.FC = () => {
           </select>
         </label>
       </div>
-      <ul>
-        {events.map((event) => (
-          <li key={event.id}>
-            <div>Timestamp: {new Date(event.timestamp).toLocaleString()}</div>
-            <div>Duração: {`${Math.floor(event.duration / 60)}m ${event.duration % 60}s`}</div>
-            <div>Dados: {JSON.stringify(event.data)}</div>
-          </li>
-        ))}
-      </ul>
+      <button
+        onClick={handleUpdateEvents}
+        className="px-4 py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600"
+      >
+        Atualizar Eventos
+      </button>
+      <div className="mt-8">
+        <EventsPieChart events={events} />
+      </div>
     </div>
   );
 };

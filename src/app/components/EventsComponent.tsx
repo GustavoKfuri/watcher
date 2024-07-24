@@ -5,6 +5,7 @@ import { useBuckets } from '../../context/bucketContext';
 import { useEvents } from '../../context/eventContext';
 import { format, parseISO } from 'date-fns';
 import EventsPieChart from './Chart';
+import { EventsProvider }from '../../context/eventContext';
 
 const EventsComponent: React.FC = () => {
   const { buckets, fetchBuckets } = useBuckets();
@@ -108,7 +109,9 @@ const EventsComponent: React.FC = () => {
         Atualizar Eventos
       </button>
       <div className="mt-8">
+        <EventsProvider>
         <EventsPieChart events={events} />
+        </EventsProvider>
       </div>
     </div>
   );

@@ -3,7 +3,8 @@
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Event } from '../../lib/types'; // Atualize o caminho para o arquivo correto
+import { Event } from '@/lib/types';// Atualize o caminho para o arquivo correto
+import { formatDuration } from '../../utils/formatDuration'; // Atualize o caminho para a função formatDuration
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -35,7 +36,7 @@ const EventsPieChart: React.FC<EventsPieChartProps> = ({ events }) => {
           label: function (context: any) {
             const label = context.label || '';
             const value = context.raw || 0;
-            return `${label}: ${value} segundos`;
+            return `${label}: ${formatDuration(value)}`;
           },
         },
       },

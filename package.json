@@ -1,6 +1,7 @@
 {
   "name": "watchactivity",
   "version": "0.1.0",
+  "proxy": "http://localhost:5600",
   "private": true,
   "scripts": {
     "dev": "next dev",

@@ -2,17 +2,18 @@ export interface Event {
   id?: number | string;
   timestamp: string;
   name: string | null;
-  type: string;  // Adicione o tipo aqui
+  type: string;  // Tipo do evento
   duration: number;
   data: { [key: string]: any };
 }
-  
-  export interface Bucket {
-    id: string;
-    created: string;
-    name: string | null;
-    type: string;
-    client: string;
+
+export interface Bucket {
+  id: string; // Unique identifier for the bucket
+  created: string; // ISO8601 formatted timestamp
+  name: string | null; // Descriptive human readable bucket name
+  type: string; // Type of events in the bucket
+  client: string; // Identifier of the client software
+  hostname?: string; // Optional hostname
 }
 
 

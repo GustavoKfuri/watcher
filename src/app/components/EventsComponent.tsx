@@ -3,9 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useBuckets } from '../../context/bucketContext';
 import { useEvents } from '../../context/eventContext';
-import { format, parseISO } from 'date-fns';
-import EventsPieChart from './Chart';
-import { EventsProvider }from '../../context/eventContext';
+import EventsPieChart from './Chart';  // Verifique o caminho correto para o seu componente Chart
 
 const EventsComponent: React.FC = () => {
   const { buckets, fetchBuckets } = useBuckets();
@@ -41,24 +39,25 @@ const EventsComponent: React.FC = () => {
           startDate = new Date(now.getTime() - 60 * 60 * 1000);
           break;
         case '2h':
-          startDate = new Date(now.getTime() - 2 * 60 * 1000);
+          startDate = new Date(now.getTime() - 2 * 60 * 60 * 1000);
           break;
         case '4h':
-          startDate = new Date(now.getTime() - 4 * 60 * 1000);
+          startDate = new Date(now.getTime() - 4 * 60 * 60 * 1000);
           break;
         case '6h':
-          startDate = new Date(now.getTime() - 6 * 60 * 1000);
+          startDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
           break;
         case '12h':
-          startDate = new Date(now.getTime() - 12 * 60 * 1000);
+          startDate = new Date(now.getTime() - 12 * 60 * 60 * 1000);
           break;
         case '24h':
-          startDate = new Date(now.getTime() - 24 * 60 * 1000);
+          startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
           break;
         default:
           startDate = undefined;
       }
 
+      console.log('Updating events with params:', { selectedBucket, startDate, now });
       fetchEvents(selectedBucket, startDate, now);
     }
   };
@@ -104,14 +103,12 @@ const EventsComponent: React.FC = () => {
       </div>
       <button
         onClick={handleUpdateEvents}
-        className="px-4 py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600"
+        className="p-2 bg-blue-500 text-white rounded-md"
       >
         Atualizar Eventos
       </button>
-      <div className="mt-8">
-        <EventsProvider>
+      <div className="mt-6">
         <EventsPieChart events={events} />
-        </EventsProvider>
       </div>
     </div>
   );

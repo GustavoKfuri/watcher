@@ -3,50 +3,65 @@
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Event } from '@/lib/types';// Atualize o caminho para o arquivo correto
-import { formatDuration } from '../../utils/formatDuration'; // Atualize o caminho para a função formatDuration
+import { Event } from '../../lib/types';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-interface EventsPieChartProps {
+interface Props {
   events: Event[];
 }
 
-const EventsPieChart: React.FC<EventsPieChartProps> = ({ events }) => {
+const EventsPieChart: React.FC<Props> = ({ events }) => {
+  console.log('Events:', events);
+
+  // Agregação dos eventos por um identificador ou outro campo
+  const aggregatedData = events.reduce((acc: Record<string, number>, event: Event) => {
+    console.log('Processing event:', event);
+
+    // Use o título ou outro campo se 'app' não estiver presente
+    const app = event.data?.app || event.data?.title || 'Unknown';
+    const duration = event.duration || 0;
+
+    acc[app] = (acc[app] || 0) + duration;
+    return acc;
+  }, {});
+
+  console.log('Aggregated Data:', aggregatedData);
+
   const data = {
-    labels: events.map(event => `ID: ${event.id}`),
+    labels: Object.keys(aggregatedData),
     datasets: [
       {
-        data: events.map(event => event.duration),
-        backgroundColor: events.map((_, index) => `hsl(${(index * 360) / events.length}, 70%, 70%)`),
-        borderColor: 'white',
+        data: Object.values(aggregatedData),
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.2)',
+          'rgba(153, 102, 255, 0.2)',
+          'rgba(255, 159, 64, 0.2)',
+          'rgba(255, 99, 132, 0.2)',
+          'rgba(54, 162, 235, 0.2)',
+          'rgba(255, 206, 86, 0.2)',
+        ],
+        borderColor: [
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)',
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+        ],
         borderWidth: 1,
       },
     ],
   };
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context: any) {
-            const label = context.label || '';
-            const value = context.raw || 0;
-            return `${label}: ${formatDuration(value)}`;
-          },
-        },
-      },
-    },
-  };
-
   return (
-    <div className="p-4 bg-white shadow rounded-md">
-      <h2 className="text-xl font-semibold mb-4">Gráfico de Pizza dos Eventos</h2>
-      <Pie data={data} options={options} />
+    <div>
+      <h3 className="text-lg font-semibold">Distribuição de Eventos</h3>
+      {data.labels.length > 0 ? (
+        <Pie data={data} />
+      ) : (
+        <p>Nenhum dado disponível para exibir.</p>
+      )}
     </div>
   );
 };

@@ -22,19 +22,32 @@ export const EventsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const fetchEvents = async (bucketId: string, startDate?: Date, endDate?: Date) => {
     const cacheKey = `${bucketId}-${startDate?.toISOString()}-${endDate?.toISOString()}`;
     
+    console.log('Fetching events with params:', { bucketId, startDate, endDate });
+
     if (cache && cache[cacheKey]) {
+      console.log('Using cached events');
       setEvents(cache[cacheKey]);
     } else {
       try {
-        const eventsData = await getEvents(bucketId, startDate, endDate);
-        setEvents(eventsData);
+        const response = await getEvents(bucketId, startDate, endDate);
+        console.log('Fetched events data:', response);
 
-        setCache(prevCache => ({
-          ...prevCache,
-          [cacheKey]: eventsData,
-        }));
+        // Convert response to an array of events if it's not already
+        const eventsArray = Array.isArray(response) ? response : Object.values(response);
+
+        if (Array.isArray(eventsArray)) {
+          const typedEventsArray = eventsArray as Event[];
+          setEvents(typedEventsArray);
+
+          setCache(prevCache => ({
+            ...prevCache,
+            [cacheKey]: typedEventsArray,
+          }));
+        } else {
+          console.error('Unexpected format of API response for events:', eventsArray);
+        }
       } catch (error) {
-        console.error('Erro ao buscar eventos:', error);
+        console.error('Error fetching events:', error);
       }
     }
   };
@@ -48,8 +61,8 @@ export const EventsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     if (autoRefreshEnabled) {
       intervalId = setInterval(() => {
-        // Lógica para atualizar eventos periodicamente, se necessário.
-      }, 60000); // Atualiza a cada 60 segundos, por exemplo.
+        // Logic for auto-refreshing events if necessary.
+      }, 60000); // Refresh every 60 seconds.
     }
 
     return () => {

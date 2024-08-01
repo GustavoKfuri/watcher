@@ -9,7 +9,9 @@ const EventsComponent: React.FC = () => {
   const { buckets, fetchBuckets } = useBuckets();
   const { events, fetchEvents } = useEvents();
   const [selectedBucket, setSelectedBucket] = useState<string>('');
-  const [timeRange, setTimeRange] = useState<string>('15min');
+  const [timeRange, setTimeRange] = useState<string>('');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
   useEffect(() => {
     fetchBuckets();
@@ -20,45 +22,57 @@ const EventsComponent: React.FC = () => {
   };
 
   const handleTimeRangeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setTimeRange(event.target.value);
+    const newTimeRange = event.target.value;
+    setTimeRange(newTimeRange);
+    if (newTimeRange === '') {
+      setStartDate('');
+      setEndDate('');
+    }
   };
 
   const handleUpdateEvents = () => {
     if (selectedBucket) {
-      let startDate: Date | undefined;
+      let start: Date | undefined;
+      let end: Date | undefined;
       const now = new Date();
 
-      switch (timeRange) {
-        case '15min':
-          startDate = new Date(now.getTime() - 15 * 60 * 1000);
-          break;
-        case '30min':
-          startDate = new Date(now.getTime() - 30 * 60 * 1000);
-          break;
-        case '1h':
-          startDate = new Date(now.getTime() - 60 * 60 * 1000);
-          break;
-        case '2h':
-          startDate = new Date(now.getTime() - 2 * 60 * 60 * 1000);
-          break;
-        case '4h':
-          startDate = new Date(now.getTime() - 4 * 60 * 60 * 1000);
-          break;
-        case '6h':
-          startDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
-          break;
-        case '12h':
-          startDate = new Date(now.getTime() - 12 * 60 * 60 * 1000);
-          break;
-        case '24h':
-          startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-          break;
-        default:
-          startDate = undefined;
+      if (startDate && endDate) {
+        start = new Date(startDate);
+        end = new Date(endDate);
+      } else if (timeRange) {
+        switch (timeRange) {
+          case '15min':
+            start = new Date(now.getTime() - 15 * 60 * 1000);
+            break;
+          case '30min':
+            start = new Date(now.getTime() - 30 * 60 * 1000);
+            break;
+          case '1h':
+            start = new Date(now.getTime() - 60 * 60 * 1000);
+            break;
+          case '2h':
+            start = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+            break;
+          case '4h':
+            start = new Date(now.getTime() - 4 * 60 * 60 * 1000);
+            break;
+          case '6h':
+            start = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+            break;
+          case '12h':
+            start = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+            break;
+          case '24h':
+            start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            break;
+          default:
+            start = undefined;
+        }
+        end = now;
       }
 
-      console.log('Updating events with params:', { selectedBucket, startDate, now });
-      fetchEvents(selectedBucket, startDate, now);
+      console.log('Updating events with params:', { selectedBucket, start, end });
+      fetchEvents(selectedBucket, start, end);
     }
   };
 
@@ -90,6 +104,7 @@ const EventsComponent: React.FC = () => {
             onChange={handleTimeRangeChange}
             className="block w-full mt-1 p-2 border border-gray-300 rounded-md"
           >
+            <option value="">Selecionar...</option>
             <option value="15min">Últimos 15 minutos</option>
             <option value="30min">Últimos 30 minutos</option>
             <option value="1h">Última 1 hora</option>
@@ -99,6 +114,28 @@ const EventsComponent: React.FC = () => {
             <option value="12h">Últimas 12 horas</option>
             <option value="24h">Últimas 24 horas</option>
           </select>
+        </label>
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2 text-sm font-medium text-gray-700">
+          Data de Início:
+          <input
+            type="date"
+            value={startDate}
+            onChange={(event) => setStartDate(event.target.value)}
+            className="block w-full mt-1 p-2 border border-gray-300 rounded-md"
+          />
+        </label>
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2 text-sm font-medium text-gray-700">
+          Data de Fim:
+          <input
+            type="date"
+            value={endDate}
+            onChange={(event) => setEndDate(event.target.value)}
+            className="block w-full mt-1 p-2 border border-gray-300 rounded-md"
+          />
         </label>
       </div>
       <button

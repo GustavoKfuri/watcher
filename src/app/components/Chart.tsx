@@ -14,6 +14,19 @@ interface Props {
 const EventsPieChart: React.FC<Props> = ({ events }) => {
   console.log('Events:', events);
 
+  // Função para formatar a duração
+  const formatDuration = (durationInMinutes: number) => {
+    if (durationInMinutes < 1) {
+      const seconds = durationInMinutes * 60;
+      return `${seconds.toFixed(2)} segundos`;
+    } else if (durationInMinutes < 60) {
+      return `${durationInMinutes.toFixed(2)} minutos`;
+    } else {
+      const hours = durationInMinutes / 60;
+      return `${hours.toFixed(2)} horas`;
+    }
+  };
+
   // Agregação dos eventos por um identificador ou outro campo
   const aggregatedData = events.reduce((acc: Record<string, number>, event: Event) => {
     console.log('Processing event:', event);
@@ -22,7 +35,10 @@ const EventsPieChart: React.FC<Props> = ({ events }) => {
     const app = event.data?.app || event.data?.title || 'Unknown';
     const duration = event.duration || 0;
 
-    acc[app] = (acc[app] || 0) + duration;
+    // Converte a duração de segundos para minutos
+    const durationInMinutes = duration / 60;
+
+    acc[app] = (acc[app] || 0) + durationInMinutes;
     return acc;
   }, {});
 
@@ -54,11 +70,25 @@ const EventsPieChart: React.FC<Props> = ({ events }) => {
     ],
   };
 
+  const options = {
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: function (tooltipItem: any) {
+            const label = data.labels[tooltipItem.dataIndex];
+            const value = data.datasets[0].data[tooltipItem.dataIndex] as number;
+            return `${label}: ${formatDuration(value)}`;
+          },
+        },
+      },
+    },
+  };
+
   return (
     <div>
       <h3 className="text-lg font-semibold">Distribuição de Eventos</h3>
       {data.labels.length > 0 ? (
-        <Pie data={data} />
+        <Pie data={data} options={options} />
       ) : (
         <p>Nenhum dado disponível para exibir.</p>
       )}
